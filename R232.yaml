@@ -1,3 +1,41 @@
-memory_space: 0xfff
-max_number: 0xff
+memory_space: 0xFFF
+max_number: 0xFF
+width_data: 8
+width_word: 4
+word_order: 'little-endian'
+
+rigister_file:
+  x0: 0
+  x1: 1
+  x2: 2
+  x3: 3
+  x4: 4
+  eq: 5
+  ap: 6
+  gp: 7
+  tgp: 8
+  pc: 9
+  pc1: 10
+  zero: 0
+
+instuction_mapping:
+  dooble:
+    opcode: [24, 4]
+    Rd: [28, 4]
+    Rs1: [20, 4]
+    Rs2: [16, 4]
+  quad:
+    imm11: [0, 11]
+    Rd: [28, 4]
+    Rs1: [20, 4]
+    Rs2: [16, 4]
+    opcode: [24, 4]
+
+coding:
+  sb:
+    opcode: 1
+    Rs1: arg1
+  ml:
+    opcode: 2
+    Rs1: arg1
 
