@@ -1,3 +1,4 @@
+from simpleeval import simple_eval
 import compiler
 import tkinter as tk
 import time
@@ -61,7 +62,9 @@ type = 'Logisim'
 file = ''
 frame_time = 0
 
-prefabs = [f.split('.')[0] for f in os.listdir('.') if f.endswith('.py') or f.endswith('.pyw')]
+layouts = os.listdir('processors') + os.listdir('.')
+prefabs = [f.split('.')[0] for f in layouts if f.endswith('.py') or f.endswith('.pyw')]
+
 if 'compiler' in prefabs:
     prefabs.remove('compiler')
 if 'universal assmebly compiler' in prefabs:
@@ -139,6 +142,7 @@ def fsave():
 def compile():
     global file,out,convert
     prefabs = [f.split('.')[0] for f in os.listdir('.') if f.endswith('.py') or f.endswith('.pyw')]
+
     if 'compiler' in prefabs:
         prefabs.remove('compiler')
     else:
