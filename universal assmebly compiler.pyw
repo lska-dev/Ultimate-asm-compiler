@@ -65,6 +65,7 @@ frame_time = 0
 layouts = os.listdir('processors') + os.listdir('.')
 prefabs = [f.split('.')[0] for f in layouts if f.endswith('.py') or f.endswith('.pyw')]
 
+
 if 'compiler' in prefabs:
     prefabs.remove('compiler')
 if 'universal assmebly compiler' in prefabs:
