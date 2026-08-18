@@ -324,8 +324,13 @@ class compiler():
                     else:
                         self.not_arg(parse_line[0],'label , value')
 
-                elif parse_line[0] == 'DATA=':
-                    self.memADR += 16
+                elif parse_line[0] == 'data=':
+                    if len(parse_line) > 2:
+                        self.LABELS[parse_line[1]] = self.memADR
+                        self.memADR += 16
+                    else:
+                        self.not_arg(parse_line[0],'label')
+
 
                 elif parse_line[0] == ':':
                     if len(parse_line) > 1:
@@ -370,10 +375,10 @@ class compiler():
                 elif parse_line[0] == ':':
                     self.memADR = self.number_string(parse_line[1])
 
-                elif parse_line[0] == 'DATA=':
-                    if self.arg1 != 0:
+                elif parse_line[0] == 'data=':
+                    if self.arg2 != 0:
                         q = []
-                        for i in self.arg1.split(','):
+                        for i in self.arg2.split(','):
                             q.append(self.number_string(i))
                         self.output_memory(q)
                     else:
