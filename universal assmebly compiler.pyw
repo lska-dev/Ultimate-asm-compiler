@@ -1,5 +1,4 @@
 from simpleeval import simple_eval
-import compiler
 import tkinter as tk
 import time
 from tkinter import filedialog, scrolledtext, ttk, messagebox
@@ -148,7 +147,8 @@ def compile():
         prefabs.remove('compiler')
     else:
         print('ВЕРНИ МНЕ compiler.py')
-
+        messagebox.showerror('КРИТИЧЕСКАЯ ОШИБКА', 'Ядро "compiler.py" не найдено')
+        return -1
     types = {
         False: 'bin',
         True: 'Logisim',
@@ -158,25 +158,33 @@ def compile():
 
     if file != '':
         try:
+
+
+
             f = open(file, 'r',encoding='utf-8')
             txt = f.read()
             f.close()
             convert = True
             loader = ModuleLoader()
 
+            compiler = loader.import_module("compiler")
+            UDL = loader.import_module("UDLAuto")
+
             mds_module = loader.import_module(select_prefab.get())
             params = mds_module.parram()
-            if params.width in[4,8,32,64]:
+            if params.width in[4,8,16,32,64,128]:
 
                 compl = compiler.compiler(txt,params,console_command=con_print,format=types[type])
                 compl.convert()
-
                 convert = False
+
+                UDL.convert(params)
+
                 out = compl.buld_damb()
             else:
                 messagebox.showerror('ОШИБКА','Неверная разрядность предустановки')
         except Exception as ex:
-            messagebox.showerror('ОШИБКА',f'Ошибка предустановки: {str(ex).replace('module','prefab')}')
+            messagebox.showerror('ОШИБКА',f'Ошибка предустановки: {ex}')
     else:
         messagebox.showerror('ОШИБКА','Выберете файл источник')
 
