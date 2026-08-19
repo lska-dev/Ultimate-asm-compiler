@@ -130,6 +130,46 @@ class compiler():
                 print(i,reverse_idx)
                 self.out.append((i + self.memADR, list[reverse_idx]))
 
+    def string_bias_expr(self, s):
+        operands = []
+        operators = []
+        valid_operators = "+-&|^<>"
+        str = ""
+        for char in s:
+            if char in valid_operators:
+                if str == "":
+                    self.bad_expression_bias(s, "двойной знак")
+                    return 0
+                operands.append(self.number_string(str))
+                str = ""
+                operators.append(char)
+            else:
+                str += char
+        operands.append(self.number_string(str))
+        print(operators)
+        print(operands)
+
+        if len(operands) < 2:
+            self.bad_expression_bias(s, "число не является выражением")
+            return 0
+
+        if len(operands) - len(operators) != 1:
+            self.bad_expression_bias(s, "неправильные операторы")
+            return 0
+        tmp = operands[0]
+        n = 0
+        for i in range(len(operators)):
+            n = operands[i + 1]
+            if operators[i] == "+": tmp = tmp + n
+            if operators[i] == "-": tmp = tmp - n
+            if operators[i] == "&": tmp = tmp & n
+            if operators[i] == "|": tmp = tmp | n
+            if operators[i] == "^": tmp = tmp ^ n
+            if operators[i] == ">": tmp = tmp >> n
+            if operators[i] == "<": tmp = tmp << n
+        return tmp
+
+
     def number_string(self, s): #Художественный фильм "С3,14здели преобразователь строка-число в форматах : 0x 0b 0o "" int
         s = str(s)
         if not self.convert_flag:
@@ -150,6 +190,14 @@ class compiler():
             else:
                 self.con.print(f'L{self.lineN}: {self.line}\n<---Символьный литерал должен содержать ровно один символ: {s}')
                 self.convert_flag = False
+                return 0
+
+        elif s.startswith("[") and s.endswith("]"):
+            o = self.string_bias_expr(s.replace('[','').replace(']',''))
+            if o <= self.max_number:
+                return o
+            else:
+                self.value_ovrfl(o)
                 return 0
 
         s_lower = s.lower()
@@ -193,11 +241,23 @@ class compiler():
             elif s_lower.startswith(':'):
                 o = self.get_label(s[1:])
                 if o <= self.max_number:
-                    print(f'L{self.lineN}:{o}')
                     return o
                 else:
+                    print(f'L{self.lineN}:{o}')
                     self.value_ovrfl(o)
                     return 0
+
+            elif s.lower().startswith("f"):
+                try:
+                    f = float(s[1:])
+                    o = struct.unpack('>I', struct.pack('>f', f))[0]
+                    if o > self.max_number:
+                        print(f'L{self.lineN}:{o}')
+                        self.value_ovrfl(o)
+                        return 0
+                    return o
+                except ValueError:
+                    pass
 
             else:
                 # Десятичное число (может быть отрицательным)
@@ -235,6 +295,10 @@ class compiler():
 
     def sys_invalid_literal(self,arg):
         self.con.print(f'L{self.lineN}: {self.line}\n<--Hеверный символ {arg}')
+        self.convert_flag = False
+
+    def bad_expression_bias(self,exp, str):
+        self.con.print(f'L{self.lineN}: {self.line}\n<--Выражение {exp} >> {str}')
         self.convert_flag = False
 
     def get_register(self,name):
@@ -325,7 +389,7 @@ class compiler():
                         self.not_arg(parse_line[0],'label , value')
 
                 elif parse_line[0] == 'data=':
-                    if len(parse_line) > 2:
+                    if len(parse_line) == 3:
                         self.LABELS[parse_line[1]] = self.memADR
                         self.memADR += 16
                     else:
@@ -376,7 +440,7 @@ class compiler():
                     self.memADR = self.number_string(parse_line[1])
 
                 elif parse_line[0] == 'data=':
-                    if self.arg2 != 0:
+                    if self.arg2 != '':
                         q = []
                         for i in self.arg2.split(','):
                             q.append(self.number_string(i))
